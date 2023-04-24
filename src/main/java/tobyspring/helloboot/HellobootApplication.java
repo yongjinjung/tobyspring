@@ -6,6 +6,7 @@ import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactor
 import org.springframework.boot.web.server.WebServer;
 import org.springframework.boot.web.servlet.ServletContextInitializer;
 import org.springframework.boot.web.servlet.server.ServletWebServerFactory;
+import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -21,7 +22,10 @@ import java.nio.charset.StandardCharsets;
 public class HellobootApplication {
     public static void main(String[] args) throws LifecycleException {
 
-        HelloControllerV2 helloCtr = new HelloControllerV2();
+        GenericApplicationContext applicationContext = new GenericApplicationContext();
+        applicationContext.registerBean(HelloControllerV2.class);
+        applicationContext.registerBean(SimpleHelloService.class);
+        applicationContext.refresh();
 
         HttpServlet servlet = new HttpServlet() {
                                                     @Override
@@ -29,6 +33,7 @@ public class HellobootApplication {
                                                         //인증, 보안, 다국어, 공통 기능
                                                         if(req.getRequestURI().equals("/hello")){
 
+                                                            HelloControllerV2 helloCtr  = applicationContext.getBean(HelloControllerV2.class);
                                                             String name = req.getParameter("name");
                                                             String result = helloCtr.hello(name);
                                                             resp.setStatus(HttpStatus.OK.value());
